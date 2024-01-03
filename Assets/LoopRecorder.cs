@@ -13,7 +13,7 @@ public class LoopRecorder : MonoBehaviour
     private AudioSource audioSource;
 
     private string currentMicDevice = null;
-    int ringbufferLengthInSeconds = 20;
+    int ringbufferLengthInSeconds = 10;
     public float timer = 0f;
     [SerializeField] int trimmedLengthInSmps = 192000;
     private int id = 0;
@@ -26,7 +26,7 @@ public class LoopRecorder : MonoBehaviour
 
     private int startIndex;
     private int endIndex;
-    [Range(-500f, 1000f)] public int preRollInMs = 0;
+    [Range(-500f, 3000f)] public int preRollInMs = 0;
     [Range(-500f, 1000f)] public int postRollInMs = 0;
 #endregion
 
@@ -90,7 +90,7 @@ public class LoopRecorder : MonoBehaviour
     void StopRecording()
     {
         isRecording = false;
-       // SetActive(false);     //in State Machine reinnehmen
+        SetActive(false);  
         print("Recording stopped!");
        // Microphone.End(Microphone.devices[0]);
         endIndex = SecondsToSmps(timer);
@@ -144,6 +144,7 @@ public class LoopRecorder : MonoBehaviour
 
     void Play(AudioClip clip)
     {
+        StopMicrophone();
         audioSource.clip = clip;
         audioSource.Play();
     }
@@ -151,18 +152,26 @@ public class LoopRecorder : MonoBehaviour
     [Button]
     void PlayRaw()
     {
+        StopMicrophone();
         Play(rawRecording);
     }
 
     [Button]
     void PlayTrimmed()
     {
+        StopMicrophone();
         Play(trimmedRecording);
     }
 
     void SetActive(bool param)
     {
         isActive = param;
+    }
+
+    [Button]
+    void StopMicrophone()
+    {
+       Microphone.End(Microphone.devices[0]);
     }
 
 

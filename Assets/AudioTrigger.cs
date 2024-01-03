@@ -13,47 +13,15 @@ public class AudioTrigger : MonoBehaviour
 
     [Range(0f, 1f)] public float attackThreshold = 0.5f;
     [Range(0f, 1f)] public float releaseThreshold = 0.5f;
-    float avgFrameRate;
+    float framerate = 500f; //roughly set the framerate here in which the project runs on your machine. The Attack and release times are dependent on this value.
 
-    //private float[] attackLevels;
-    //private float[] releaseLevels;
     private Queue<float> attackLevels;
     private Queue<float> releaseLevels;
 
-    int fps = 50;   //init value to avoid division by 0
-
-
     private int attack;
-    public int Attack
-    {
-        get => attack;  
-        set
-        {
-            attack = value;
-            attackLevels = new Queue<float>(value);
-            for (int i = 0; i < value; i++)
-            {
-                attackLevels.Enqueue(0f);
-            }
-        }
-    }
-
     private int release;
-    public int Release
-    {
-        get => release;
-        set
-        {
-            release = value;
-            releaseLevels = new Queue<float>(value);
-            for (int i = 0; i < value; i++)
-            {
-                releaseLevels.Enqueue(1f);
-            }   
-        }
-    }
 
-    public float inputLevel;
+   public float inputLevel;
    public float InputLevel
    {
         get => inputLevel;
@@ -68,18 +36,10 @@ public class AudioTrigger : MonoBehaviour
 
     void Awake() 
     {
-        SetAttackRelease(100, 1000);
+        ResetAttackLevels(300);
+        ResetReleaseLevels(1000);
     }
 
-    void Start()
-    {
-        StartCoroutine(CalculateRunningAverageOfFps());
-    }
-    
-    void Update()
-    {
-        fps++;
-    }
 
 
     private void TrackInputLevel(float level)
@@ -89,54 +49,47 @@ public class AudioTrigger : MonoBehaviour
             return;
         }
 
+        attackLevels.Dequeue();
+        releaseLevels.Dequeue();
+
         attackLevels.Enqueue(level);
         releaseLevels.Enqueue(level);
 
         if(attackLevels.Average() > attackThreshold && !LoopRecorder.Instance.isRecording)
         {
             OnStartThresholdCrossed?.Invoke();
+            ResetAttackLevels(300);
         }
         else if(releaseLevels.Average() < releaseThreshold && LoopRecorder.Instance.isRecording)
         {
-            OnStopThresholdCrossed?.Invoke();        
+            OnStopThresholdCrossed?.Invoke();
+            ResetReleaseLevels(1000);
         }
     }   
 
 
-    void SetAttackRelease(int attInMs, int relInMs)
+    void ResetAttackLevels(int attInMs)
     {
-        if(attInMs <= 0 || relInMs <= 0)
+        attack = (int) ((attInMs / 1000f) * framerate); //attack in frames
+        attackLevels = new Queue<float>();
+        for (int i = 0; i < attack; i++)
         {
-            Debug.LogError("Attack and Release must be greater than 0");
-            return;
-        }
-
-        Attack = (int) ((attInMs / 1000f) * avgFrameRate);
-        Release = (int) ((relInMs / 1000f) * avgFrameRate);
-    }
-
-
-
-    private IEnumerator CalculateRunningAverageOfFps()
-    {
-        const float updateTime = 1f;
-        Queue<float> values = new Queue<float>();
-        const int MaxValues = 5;
-
-        while(true)
-        {
-            if (values.Count > MaxValues)
-            {
-                values.Dequeue();
-            }
-            values.Enqueue(fps);
-            fps = 0;
-
-            avgFrameRate = values.Average();
-            //print("Average fps: "+avgFrameRate);
-            yield return new WaitForSeconds(updateTime);
+            attackLevels.Enqueue(0f);
         }
     }
+
+    void ResetReleaseLevels(int relInMs)
+    {
+   
+        release = (int)((relInMs / 1000f) * framerate); //release in frames
+        releaseLevels = new Queue<float>();
+        for (int i = 0; i < release; i++)
+        {
+            releaseLevels.Enqueue(1f);
+        }
+    }
+
+
 
 
 }

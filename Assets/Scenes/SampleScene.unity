@@ -284,8 +284,8 @@ MonoBehaviour:
   _channel: 0
   _filterType: 0
   _autoGain: 0
-  _gain: 15.4
-  _dynamicRange: 26.9
+  _gain: 29.1
+  _dynamicRange: 16.8
   _smoothFall: 1
   _fallSpeed: 0.3
   _propertyBinders:
@@ -298,7 +298,7 @@ MonoBehaviour:
       data:
         Enabled: 1
         Target: {fileID: 685473294}
-        PropertyName: InputSignal
+        PropertyName: InputLevel
         _propertyType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
           PublicKeyToken=b77a5c561934e089
         Value0: 0
@@ -315,9 +315,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fdd7382f5a5a984aac469f237eefe1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attackThreshold: 0.5
-  releaseThreshold: 0.5
-  inputSignal: 0
+  attackThreshold: 0.355
+  releaseThreshold: 0.094
+  inputLevel: 0
 --- !u!82 &685473295
 AudioSource:
   m_ObjectHideFlags: 0
